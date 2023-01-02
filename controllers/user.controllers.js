@@ -21,7 +21,7 @@ module.exports.signup = async (req, res) => {
 	} catch (error) {
 		console.log(error);
 		//error : duplicate username
-		if (error.keyValue.contains("username"))
+		if (error.keyValue.toString().contains("username"))
 			return res.status(409).send({
 				status: "error : conflict",
 				message: "Un compte existe déjà avec ce username.",
