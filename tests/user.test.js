@@ -1,17 +1,5 @@
-const mongoose = require("mongoose");
 const request = require("supertest");
 const { app } = require("../app");
-require("dotenv").config({ path: "./config/.env" });
-
-/* Connecting to the database before each test. */
-beforeEach(async () => {
-	await mongoose.connect(process.env.DB_URL_TEST);
-});
-
-/* Closing database connection after each test. */
-afterEach(async () => {
-	await mongoose.connection.close();
-});
 
 describe("POST /api/v1/user/signup", () => {
 	it("should return the created user", async () => {
@@ -35,5 +23,21 @@ describe("POST /api/v1/user/signup", () => {
 				}),
 			})
 		);
+	});
+
+	it("should return an error for duplicate username", async () => {
+		const res = await request(app).post("/api/v1/user/signup").send({
+			username: "Rudy",
+			email: "rudy123@test.com",
+			phoneNumber: "1114567890",
+			password: "Test123@",
+			repeatPassword: "Test123@",
+		});
+
+		expect(res.statusCode).toBe(409);
+		expect(res.body).toEqual({
+			status: "error : conflict",
+			message: "Un compte existe déjà avec ce username.",
+		});
 	});
 });
