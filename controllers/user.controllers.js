@@ -21,19 +21,19 @@ module.exports.signup = async (req, res) => {
 	} catch (error) {
 		console.log(error);
 		//error : duplicate username
-		if (error.keyValue.toString().contains("username"))
+		if (Object.keys(error.keyValue).includes("username"))
 			return res.status(409).send({
 				status: "error : conflict",
 				message: "Un compte existe déjà avec ce username.",
 			});
 		//error : duplicate email
-		if (error.keyValue.contains("email"))
+		if (Object.keys(error.keyValue).includes("email"))
 			return res.status(409).send({
 				status: "error : conflict",
 				message: "Un compte existe déjà avec cet e-mail.",
 			});
 		//error : duplicate phone number
-		if (error.keyValue.contains("phone"))
+		if (Object.keys(error.keyValue).includes("phone"))
 			return res.status(409).send({
 				status: "error : conflict",
 				message: "Un compte existe déjà avec ce numéro de téléphone.",
