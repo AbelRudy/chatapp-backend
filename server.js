@@ -1,21 +1,12 @@
-const express = require("express");
+const mongoose = require("mongoose");
 const http = require("http");
-const cors = require("cors");
-require("dotenv").config({ path: "./config/.env" });
-const dbConnection = require("./config/db");
-const {UserRoutes} = require("./routes")
+const { app, PORT } = require("./app");
 
-const app = express();
-const PORT = process.env.PORT || process.env.DEV_PORT;
-
-app.use(express.json());
-app.use(cors());
-
-app.use("/api/v1/user", UserRoutes)
-
+mongoose.set("strictQuery", false);
 const server = http.createServer(app);
 
-dbConnection
+mongoose
+	.connect(process.env.DB_URL)
 	.then(() => {
 		server.listen(PORT, () => {
 			console.log(`Server is listening on port ${PORT}`);
