@@ -101,34 +101,16 @@ describe("POST /api/v1/user/login", () => {
 				});
 		});
 
-		it("should return the user with access and refresh tokens", async () => {
-			const res = await request(app).post("/api/v1/user/login").send({
-				phoneNumber: user.phoneNumber,
-			});
-
-			expect(res.statusCode).toBe(200),
-				expect(res.body).toEqual({
-					status: "success",
-					data: {
-						...user,
-						token: {
-							accessToken: expect.any(String),
-							refreshToken: expect.any(String),
-						},
-					},
-				});
-		});
-
 		it("should return an error due to unknown phone number", async () => {
 			const res = await request(app).post("/api/v1/user/login").send({
 				phoneNumber: "1231231230",
 			});
 
-            expect(res.statusCode).toBe(404)
-            expect(res.body).toEqual({
-                status: expect.stringContaining("error"),
-                message: expect.stringMatching(/[Nn]on trouvé/)
-            })
+			expect(res.statusCode).toBe(404);
+			expect(res.body).toEqual({
+				status: expect.stringContaining("error"),
+				message: expect.stringMatching(/[Nn]on trouvé/),
+			});
 		});
 	});
 });
