@@ -7,7 +7,7 @@ module.exports.signup = joi.object({
 		.regex(/^[a-zA-Z0-9]{3,50}$/)
 		.required(),
 	phoneNumber: joi.string().required(),
-	email: joi.string().email().required(),
+	email: joi.string().email().lowercase().required(),
 	/**
 	 * Between 8 and 15 characters,
 	 * At least one upper letter,

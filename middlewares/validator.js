@@ -12,8 +12,6 @@ module.exports = function (validator) {
 			req.body = validated;
 			next();
 		} catch (err) {
-			//* Pass err to next
-			//! If validation error occurs call next with HTTP 422. Otherwise HTTP 500
 			if (err.isJoi)
 				return res.status(422).send({
 					status: "error : unprocessable entity",
