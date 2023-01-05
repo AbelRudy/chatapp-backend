@@ -44,7 +44,7 @@ describe("POST /api/v1/user/signup", () => {
 		expect(res.statusCode).toBe(409);
 		expect(res.body).toEqual({
 			status: expect.stringContaining("error"),
-			message: expect.stringContaining("username"),
+			message: expect.stringMatching(/username|[Nn]om d'utilisateur/),
 		});
 	});
 
@@ -86,13 +86,19 @@ describe("POST /api/v1/user/login", () => {
 		it("should return the user with access and refresh tokens", async () => {
 			const res = await request(app).post("/api/v1/user/login").send({
 				phoneNumber: user.phoneNumber,
+                password: user.password
 			});
 
 			expect(res.statusCode).toBe(200),
 				expect(res.body).toEqual({
 					status: "success",
 					data: {
-						...user,
+						_id: user._id,
+		username: user.username,
+		phoneNumber: user.phoneNumber,
+		email: user.email,
+		bio: user.bio,
+		createdAt: user.createdAt,
 						token: {
 							accessToken: expect.any(String),
 							refreshToken: expect.any(String),
@@ -104,6 +110,7 @@ describe("POST /api/v1/user/login", () => {
 		it("should return an error due to unknown phone number", async () => {
 			const res = await request(app).post("/api/v1/user/login").send({
 				phoneNumber: "1231231230",
+                password: user.password
 			});
 
 			expect(res.statusCode).toBe(404);
@@ -113,4 +120,70 @@ describe("POST /api/v1/user/login", () => {
 			});
 		});
 	});
+	
+    describe("login by username or email and password", () => {
+		it("(username) should return the user with access and refresh tokens", async () => {
+			const res = await request(app).post("/api/v1/user/login").send({
+				username: user.username,
+                password: user.password,
+			});
+
+			expect(res.statusCode).toBe(200),
+				expect(res.body).toEqual({
+					status: "success",
+					data: {
+						_id: user._id,
+		username: user.username,
+		phoneNumber: user.phoneNumber,
+		email: user.email,
+		bio: user.bio,
+		createdAt: user.createdAt,
+						token: {
+							accessToken: expect.any(String),
+							refreshToken: expect.any(String),
+						},
+					},
+				});
+		});
+
+        it("(email) should return the user with access and refresh tokens", async () => {
+			const res = await request(app).post("/api/v1/user/login").send({
+				email: user.email,
+                password: user.password,
+			});
+
+			expect(res.statusCode).toBe(200),
+				expect(res.body).toEqual({
+					status: "success",
+					data: {
+						_id: user._id,
+		username: user.username,
+		phoneNumber: user.phoneNumber,
+		email: user.email,
+		bio: user.bio,
+		createdAt: user.createdAt,
+						token: {
+							accessToken: expect.any(String),
+							refreshToken: expect.any(String),
+						},
+					},
+				});
+		});
+
+		it("should return an error due to unknown credentials", async () => {
+			const res = await request(app).post("/api/v1/user/login").send({
+				username: "Rudy123",//could be email*
+                password: user.password
+			});
+
+			expect(res.statusCode).toBe(404);
+			expect(res.body).toEqual({
+				status: expect.stringContaining("error"),
+				message: expect.stringMatching(/[Nn]on trouvé/),
+			});
+		});
+
+        
+	});
+	
 });
