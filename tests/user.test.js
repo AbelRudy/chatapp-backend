@@ -24,12 +24,16 @@ describe("POST /api/v1/user/signup", () => {
 					phoneNumber: user.phoneNumber,
 					bio: "Salut! Lançons un chat!",
 					createdAt: expect.any(String),
+					image: "avatar.png"
 				},
 			})
 		);
 
 		//For other tests
-		user = res.body.data;
+		user._id = res.body.data._id;
+		user.image = res.body.data.image;
+		user.createdAt = res.body.data.createdAt;
+		user.bio = res.body.data.bio;
 	});
 
 	it("should return an error for duplicate username", async () => {
@@ -86,7 +90,7 @@ describe("POST /api/v1/user/login", () => {
 		it("should return the user with access and refresh tokens", async () => {
 			const res = await request(app).post("/api/v1/user/login").send({
 				phoneNumber: user.phoneNumber,
-                password: user.password
+				password: user.password,
 			});
 
 			expect(res.statusCode).toBe(200),
@@ -94,12 +98,13 @@ describe("POST /api/v1/user/login", () => {
 					status: "success",
 					data: {
 						_id: user._id,
-		username: user.username,
-		phoneNumber: user.phoneNumber,
-		email: user.email,
-		bio: user.bio,
-		createdAt: user.createdAt,
-						token: {
+						username: user.username,
+						phoneNumber: user.phoneNumber,
+						email: user.email,
+						image: user.image,
+						bio: user.bio,
+						createdAt: user.createdAt,
+						tokens: {
 							accessToken: expect.any(String),
 							refreshToken: expect.any(String),
 						},
@@ -110,7 +115,7 @@ describe("POST /api/v1/user/login", () => {
 		it("should return an error due to unknown phone number", async () => {
 			const res = await request(app).post("/api/v1/user/login").send({
 				phoneNumber: "1231231230",
-                password: user.password
+				password: user.password,
 			});
 
 			expect(res.statusCode).toBe(404);
@@ -120,12 +125,12 @@ describe("POST /api/v1/user/login", () => {
 			});
 		});
 	});
-	
-    describe("login by username or email and password", () => {
+
+	describe("login by username or email and password", () => {
 		it("(username) should return the user with access and refresh tokens", async () => {
 			const res = await request(app).post("/api/v1/user/login").send({
 				username: user.username,
-                password: user.password,
+				password: user.password,
 			});
 
 			expect(res.statusCode).toBe(200),
@@ -133,12 +138,13 @@ describe("POST /api/v1/user/login", () => {
 					status: "success",
 					data: {
 						_id: user._id,
-		username: user.username,
-		phoneNumber: user.phoneNumber,
-		email: user.email,
-		bio: user.bio,
-		createdAt: user.createdAt,
-						token: {
+						username: user.username,
+						phoneNumber: user.phoneNumber,
+						email: user.email,
+						image: user.image,
+						bio: user.bio,
+						createdAt: user.createdAt,
+						tokens: {
 							accessToken: expect.any(String),
 							refreshToken: expect.any(String),
 						},
@@ -146,23 +152,26 @@ describe("POST /api/v1/user/login", () => {
 				});
 		});
 
-        it("(email) should return the user with access and refresh tokens", async () => {
+		it("(email) should return the user with access and refresh tokens", async () => {
 			const res = await request(app).post("/api/v1/user/login").send({
 				email: user.email,
-                password: user.password,
+				password: user.password,
 			});
+
+			console.log(user)
 
 			expect(res.statusCode).toBe(200),
 				expect(res.body).toEqual({
 					status: "success",
 					data: {
 						_id: user._id,
-		username: user.username,
-		phoneNumber: user.phoneNumber,
-		email: user.email,
-		bio: user.bio,
-		createdAt: user.createdAt,
-						token: {
+						username: user.username,
+						phoneNumber: user.phoneNumber,
+						email: user.email,
+						image: user.image,
+						bio: user.bio,
+						createdAt: user.createdAt,
+						tokens: {
 							accessToken: expect.any(String),
 							refreshToken: expect.any(String),
 						},
@@ -172,8 +181,8 @@ describe("POST /api/v1/user/login", () => {
 
 		it("should return an error due to unknown credentials", async () => {
 			const res = await request(app).post("/api/v1/user/login").send({
-				username: "Rudy123",//could be email*
-                password: user.password
+				username: "Rudy123", //could be email*
+				password: user.password,
 			});
 
 			expect(res.statusCode).toBe(404);
@@ -182,8 +191,5 @@ describe("POST /api/v1/user/login", () => {
 				message: expect.any(String),
 			});
 		});
-
-        
 	});
-	
 });

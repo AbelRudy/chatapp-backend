@@ -15,9 +15,7 @@ module.exports.signup = async (req, res) => {
 			password: encryptedPassword,
 		});
 
-		return res
-			.status(201)
-			.send({ status: "created", data: user.getUserInfos() });
+		return res.status(201).send({ status: "created", data: user.toJSON() });
 	} catch (error) {
 		console.log(error);
 		//error : duplicate username
@@ -39,6 +37,78 @@ module.exports.signup = async (req, res) => {
 				message: "Un compte existe déjà avec ce numéro de téléphone.",
 			});
 
+		return res.status(500).send({
+			status: "error : internal server error",
+			message: "Erreur interne du serveur. Veuillez réessayer svp.",
+		});
+	}
+};
+
+module.exports.login = async (req, res) => {
+	try {
+		const { username, email, phoneNumber, password } = req.body;
+		let user = null;
+
+		if (phoneNumber) {
+			//login by phone number
+			user = await UserModel.findOne({ phoneNumber });
+
+			if (!user)
+				return res.status(404).send({
+					status: "error : not found",
+					message:
+						"numéro de téléphone ou mot de passe incorrect. Veuillez réessayer svp",
+				});
+		} else if (username) {
+			//login by username
+			user = await UserModel.findOne({ username });
+
+			if (!user)
+				return res.status(404).send({
+					status: "error : not found",
+					message:
+						"nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer svp",
+				});
+		} else if (email) {
+			//login by email
+			user = await UserModel.findOne({ email });
+
+			if (!user)
+				return res.status(404).send({
+					status: "error : not found",
+					message: "email ou mot de passe incorrect. Veuillez réessayer svp",
+				});
+		}
+
+		bcrypt.compare(password, user.password, (err) => {
+			if (err)
+				return res.status(404).send({
+					status: "error : not found",
+					message:
+						"nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer svp",
+				});
+			const [accessToken, refreshToken] = user.generateTokens();
+
+			user.sessions.push({
+				refreshToken,
+				expiresAt: Date.now() / 1000 + 30 * 24 * 60 * 60, //today + 30 days
+			});
+
+			user.save(); //To save the refresh token in db
+
+			return res.status(200).send({
+				status: "success",
+				data: {
+					...user.toJSON(),
+					tokens: {
+						accessToken,
+						refreshToken,
+					},
+				},
+			});
+		});
+	} catch (error) {
+		console.log(error);
 		return res.status(500).send({
 			status: "error : internal server error",
 			message: "Erreur interne du serveur. Veuillez réessayer svp.",
