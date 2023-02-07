@@ -20,7 +20,7 @@ afterEach(async () => {
 	await mongoose.connection.close();
 });
 
-// global.console = {
-// 	...console,
-// 	log: jest.fn(),
-// };
+global.console = {
+	...console,
+	log: jest.fn(),
+};
