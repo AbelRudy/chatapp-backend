@@ -1,13 +1,18 @@
-const mongoose = require("mongoose");
+const express = require("express");
 const http = require("http");
-const { app, PORT } = require("./app");
-const crypto = require("crypto")
+const cors = require("cors");
+require("dotenv").config({ path: "./config/.env" });
+const dbConnection = require("./config/db");
 
-mongoose.set("strictQuery", false);
+const app = express();
+const PORT = process.env.PORT || process.env.DEV_PORT;
+
+app.use(express.json());
+app.use(cors());
+
 const server = http.createServer(app);
 
-mongoose
-	.connect(process.env.DB_URL)
+dbConnection
 	.then(() => {
 		server.listen(PORT, () => {
 			console.log(`Server is listening on port ${PORT}`);

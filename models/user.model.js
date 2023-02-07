@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const _ = require("lodash");
 const { randomBytes } = require("crypto");
-require("dotenv").config({});
+require("dotenv").config({ path: "../config/.env" });
 
 const { JWT_SECRET_KEY } = process.env;
 
@@ -29,16 +29,18 @@ const UserSchema = new mongoose.Schema(
 			type: String,
 			default: "Salut! Lançons un chat!",
 		},
-		sessions: [{
-			refreshToken: {
-				type: String,
-				required: true
+		sessions: [
+			{
+				refreshToken: {
+					type: String,
+					required: true,
+				},
+				expiresAt: {
+					type: Number,
+					required: true,
+				},
 			},
-			expiresAt: {
-				type: Number,
-				required: true
-			}
-		}]
+		],
 	},
 	{
 		timestamps: true,
@@ -46,7 +48,7 @@ const UserSchema = new mongoose.Schema(
 );
 
 UserSchema.methods.toJSON = function () {
-	return _.omit(this.toObject(), ['password', 'sessions', "__v", "updatedAt"]);
+	return _.omit(this.toObject(), ["password", "sessions", "__v", "updatedAt"]);
 };
 
 UserSchema.methods.generateTokens = function () {
