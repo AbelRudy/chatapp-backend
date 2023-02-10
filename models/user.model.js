@@ -12,10 +12,6 @@ const UserSchema = new mongoose.Schema(
 			type: String,
 			unique: true,
 		},
-		phoneNumber: {
-			type: String,
-			unique: true,
-		},
 		email: {
 			type: String,
 			unique: true,
@@ -72,7 +68,6 @@ UserSchema.methods.generateAccessToken = function () {
 			_id: this._id,
 			username: this.username,
 			email: this.email,
-			phoneNumber: this.phoneNumber,
 		},
 		JWT_ACCESS_TOKEN,
 		{ expiresIn: "15m" }

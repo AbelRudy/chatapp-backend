@@ -2,7 +2,7 @@ const UserModel = require("../models/user.model");
 const bcrypt = require("bcrypt");
 
 module.exports.signup = async (req, res) => {
-	const { username, phoneNumber, email, password } = req.body;
+	const { username, email, password } = req.body;
 
 	try {
 		const salt = await bcrypt.genSalt();
@@ -10,7 +10,6 @@ module.exports.signup = async (req, res) => {
 
 		const user = await UserModel.create({
 			username,
-			phoneNumber,
 			email,
 			password: encryptedPassword,
 		});
@@ -38,13 +37,10 @@ module.exports.signup = async (req, res) => {
 
 module.exports.login = async (req, res) => {
 	try {
-		const { username, email, phoneNumber, password } = req.body;
+		const { username, email, password } = req.body;
 		let user = null;
 
-		if (phoneNumber) {
-			//login by phone number
-			user = await UserModel.findOne({ phoneNumber });
-		} else if (username) {
+		if (username) {
 			//login by username
 			user = await UserModel.findOne({ username });
 		} else if (email) {

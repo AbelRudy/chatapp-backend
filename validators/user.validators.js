@@ -6,7 +6,6 @@ module.exports.signup = joi.object({
 		.string()
 		.regex(/^[a-zA-Z0-9]{3,50}$/)
 		.required(),
-	phoneNumber: joi.string().required(),
 	email: joi.string().email().lowercase().required(),
 	/**
 	 * Between 8 and 15 characters,
@@ -26,7 +25,6 @@ module.exports.login = joi
 	.object({
 		//username with digits and and (upper/lower) letters
 		username: joi.string().regex(/^[a-zA-Z0-9]{3,50}$/),
-		phoneNumber: joi.string(),
 		email: joi.string().email().lowercase(),
 		password: joi
 			.string()
@@ -35,4 +33,4 @@ module.exports.login = joi
 			)
 			.required(),
 	})
-	.xor("username", "phoneNumber", "email");
+	.xor("username", "email");
