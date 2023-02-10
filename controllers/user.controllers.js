@@ -66,7 +66,7 @@ module.exports.login = async (req, res) => {
 			return res
 				.status(200)
 				.set({
-					"x-access-token": accessToken,
+					"Authorization": accessToken,
 					"x-refresh-token": refreshToken,
 				})
 				.send({

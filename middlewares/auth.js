@@ -5,7 +5,7 @@ require("dotenv").config({ path: "../config/.env" });
 const { JWT_ACCESS_TOKEN } = process.env;
 
 module.exports.verifyToken = async function (req, res, next) {
-	let accessToken = req.header("x-access-token");
+	let accessToken = req.header("Authorization");
 	let refreshToken = req.header("x-refresh-token");
 	let userId = req.header("x-id");
 
@@ -15,7 +15,7 @@ module.exports.verifyToken = async function (req, res, next) {
 
 	try {
 		accessToken = accessToken.replace(/^Bearer\s+/, "");
-		jwt.verify(accessToken, JWT_ACCESS_TOKEN);
+		req.user = jwt.verify(accessToken, JWT_ACCESS_TOKEN);
 		return next();
 	} catch (error) {
 		//An error can be "expired access token"
@@ -33,8 +33,8 @@ module.exports.verifyToken = async function (req, res, next) {
 				//refresh token is valid
 				//We generate a new accesstoken
 				accessToken = user.generateAccessToken();
-				req.headers["x-access-token"] = accessToken;
-				res.set("x-access-token", accessToken);
+				req.headers["Authorization"] = accessToken;
+				res.set("Authorization", accessToken);
 				req.user = user;
 				return next();
 			} else {
