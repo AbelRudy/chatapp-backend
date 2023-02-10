@@ -5,13 +5,24 @@ module.exports.createMessage = async (req, res) => {
 	const senderId = req.user._id;
 	const { receiverId, content } = req.body;
 
-	if (
-		!(await UserModel.findById(senderId)) ||
-		!(await UserModel.findById(receiverId))
-	)
+	//The auth middleware didn't throw an error, so we don't need to verify if the senderId exists
+	if (!(await UserModel.findById(receiverId)))
 		return res.status(400).send("Utilisateur non trouvé");
 
 	const message = await MessageModel.create({ senderId, receiverId, content });
 
 	return res.status(201).send(message.toJSON());
+};
+
+module.exports.getAllMessages = async (req, res) => {
+	const senderId = req.user._id;
+	const { receiverId } = req.params;
+
+	//The auth middleware didn't throw an error, so we don't need to verify if the senderId exists
+	if (!(await UserModel.findById(receiverId)))
+		return res.status(400).send("Utilisateur non trouvé");
+
+	const messages = await MessageModel.find({ senderId, receiverId });
+
+	return res.status(200).send(messages.map((message) => message.toJSON()));
 };

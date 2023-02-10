@@ -10,4 +10,10 @@ router.post(
 	MessageController.createMessage
 );
 
+router.get(
+    "/all/:receiverId",
+    verifyToken,
+    MessageController.getAllMessages
+)
+
 module.exports = router;
