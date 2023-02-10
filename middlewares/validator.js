@@ -13,14 +13,8 @@ module.exports = function (validator) {
 			next();
 		} catch (err) {
 			if (err.isJoi)
-				return res.status(422).send({
-					status: "error : unprocessable entity",
-					message: err.message,
-				});
-			return res.status(500).send({
-				status: "error : internal server error",
-				message: "Erreur interne du serveur. Veuillez réessayer",
-			});
+				return res.status(422).send(err.message);
+			return res.status(500).send("Erreur interne du serveur. Veuillez réessayer");
 		}
 	};
 };

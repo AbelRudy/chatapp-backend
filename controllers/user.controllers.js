@@ -15,32 +15,24 @@ module.exports.signup = async (req, res) => {
 			password: encryptedPassword,
 		});
 
-		return res.status(201).send({ status: "created", data: user.toJSON() });
+		return res.status(201).send(user.toJSON());
 	} catch (error) {
 		console.log(error);
 		//error : duplicate username
 		if (Object.keys(error.keyValue)[0].includes("username"))
-			return res.status(409).send({
-				status: "error : conflict",
-				message: "Un compte existe déjà avec ce username.",
-			});
+			return res.status(409).send("Un compte existe déjà avec ce username.");
 		//error : duplicate email
 		if (Object.keys(error.keyValue)[0].includes("email"))
-			return res.status(409).send({
-				status: "error : conflict",
-				message: "Un compte existe déjà avec cet email.",
-			});
+			return res.status(409).send("Un compte existe déjà avec cet email.");
 		//error : duplicate phone number
 		if (Object.keys(error.keyValue)[0].includes("phone"))
-			return res.status(409).send({
-				status: "error : conflict",
-				message: "Un compte existe déjà avec ce numéro de téléphone.",
-			});
+			return res
+				.status(409)
+				.send("Un compte existe déjà avec ce numéro de téléphone.");
 
-		return res.status(500).send({
-			status: "error : internal server error",
-			message: "Erreur interne du serveur. Veuillez réessayer svp.",
-		});
+		return res
+			.status(500)
+			.send("Erreur interne du serveur. Veuillez réessayer svp.");
 	}
 };
 
@@ -52,66 +44,52 @@ module.exports.login = async (req, res) => {
 		if (phoneNumber) {
 			//login by phone number
 			user = await UserModel.findOne({ phoneNumber });
-
-			if (!user)
-				return res.status(404).send({
-					status: "error : not found",
-					message:
-						"numéro de téléphone ou mot de passe incorrect. Veuillez réessayer svp",
-				});
 		} else if (username) {
 			//login by username
 			user = await UserModel.findOne({ username });
-
-			if (!user)
-				return res.status(404).send({
-					status: "error : not found",
-					message:
-						"nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer svp",
-				});
 		} else if (email) {
 			//login by email
 			user = await UserModel.findOne({ email });
-
-			if (!user)
-				return res.status(404).send({
-					status: "error : not found",
-					message: "email ou mot de passe incorrect. Veuillez réessayer svp",
-				});
 		}
 
-		bcrypt.compare(password, user.password, (err) => {
+		bcrypt.compare(password, user?.password, (err) => {
 			if (err)
-				return res.status(404).send({
-					status: "error : not found",
-					message:
-						"nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer svp",
-				});
+				return res
+					.status(404)
+					.send(
+						"nom d'utilisateur ou mot de passe incorrect. Veuillez réessayer svp"
+					);
 			const [accessToken, refreshToken] = user.generateTokens();
 
-			user.sessions.push({
-				refreshToken,
-				expiresAt: Date.now() / 1000 + 30 * 24 * 60 * 60, //today + 30 days
-			});
+			user.addSession(refreshToken);
 
-			user.save(); //To save the refresh token in db
-
-			return res.status(200).send({
-				status: "success",
-				data: {
+			return res
+				.status(200)
+				.set({
+					"x-access-token": accessToken,
+					"x-refresh-token": refreshToken,
+				})
+				.send({
 					...user.toJSON(),
-					tokens: {
-						accessToken,
-						refreshToken,
-					},
-				},
-			});
+				});
 		});
 	} catch (error) {
 		console.log(error);
-		return res.status(500).send({
-			status: "error : internal server error",
-			message: "Erreur interne du serveur. Veuillez réessayer svp.",
-		});
+		return res
+			.status(500)
+			.send("Erreur interne du serveur. Veuillez réessayer svp.");
 	}
+};
+
+module.exports.logout = async (req, res) => {
+	const refreshToken = req.header("x-refresh-token");
+	const userId = req.header("x-id");
+
+	const user = await UserModel.findById(userId);
+
+	user.removeSession(refreshToken);
+
+	console.log(user);
+
+	res.status(200).send(user);
 };

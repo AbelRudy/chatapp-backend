@@ -4,7 +4,7 @@ const _ = require("lodash");
 const { randomBytes } = require("crypto");
 require("dotenv").config({ path: "../config/.env" });
 
-const { JWT_SECRET_KEY } = process.env;
+const { JWT_ACCESS_TOKEN } = process.env;
 
 const UserSchema = new mongoose.Schema(
 	{
@@ -47,25 +47,60 @@ const UserSchema = new mongoose.Schema(
 	}
 );
 
+/* STATIC METHODS */
+
+UserSchema.statics.findByIdAndRefreshToken = function (_id, refreshToken) {
+	return this.findOne({
+		_id,
+		"sessions.refreshToken": refreshToken,
+	});
+};
+
+/* INSTANCE METHODS */
+
 UserSchema.methods.toJSON = function () {
 	return _.omit(this.toObject(), ["password", "sessions", "__v", "updatedAt"]);
 };
 
 UserSchema.methods.generateTokens = function () {
-	const accessToken = jwt.sign(
+	return [this.generateAccessToken(), this.generateRefreshToken()];
+};
+
+UserSchema.methods.generateAccessToken = function () {
+	return jwt.sign(
 		{
 			_id: this._id,
 			username: this.username,
-			phoneNumber: this.phoneNumber,
 			email: this.email,
+			phoneNumber: this.phoneNumber,
 		},
-		JWT_SECRET_KEY,
-		{ expiresIn: "15m" }
+		JWT_ACCESS_TOKEN,
+		{ expiresIn: "60s" }
 	);
+};
 
-	const refreshToken = randomBytes(64).toString("hex");
+UserSchema.methods.generateRefreshToken = function () {
+	return randomBytes(64).toString("hex");
+};
 
-	return [accessToken, refreshToken];
+UserSchema.methods.addSession = function (refreshToken) {
+	const daysBeforeExpireDate = 30;
+	this.sessions.push({
+		refreshToken,
+		expiresAt: Date.now() + daysBeforeExpireDate * 24 * 60 * 60 * 1000,
+	});
+	this.save();
+};
+
+UserSchema.methods.removeSession = function (refreshToken) {
+	this.sessions = this.sessions.filter(
+		(token) => token.refreshToken !== refreshToken
+	);
+	this.save();
+};
+
+UserSchema.methods.findSessionByRefreshToken = function (refreshToken) {
+	return this.sessions.find((session) => session.refreshToken === refreshToken);
 };
 
 module.exports = mongoose.model("users", UserSchema);
