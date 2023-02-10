@@ -75,7 +75,7 @@ UserSchema.methods.generateAccessToken = function () {
 			phoneNumber: this.phoneNumber,
 		},
 		JWT_ACCESS_TOKEN,
-		{ expiresIn: "60s" }
+		{ expiresIn: "15m" }
 	);
 };
 
@@ -84,7 +84,7 @@ UserSchema.methods.generateRefreshToken = function () {
 };
 
 UserSchema.methods.addSession = function (refreshToken) {
-	const daysBeforeExpireDate = 30;
+	const daysBeforeExpireDate = 365; //1 year
 	this.sessions.push({
 		refreshToken,
 		expiresAt: Date.now() + daysBeforeExpireDate * 24 * 60 * 60 * 1000,
