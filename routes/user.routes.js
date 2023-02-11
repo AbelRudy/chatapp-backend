@@ -5,6 +5,6 @@ const validator = require("../middlewares/validator");
 
 router.post("/signup", validator("signup"), UserController.signup);
 router.post("/login", validator("login"), UserController.login);
-router.post("/logout", verifyToken, UserController.logout);
+router.patch("/logout", verifyToken, UserController.logout);
 
 module.exports = router;
