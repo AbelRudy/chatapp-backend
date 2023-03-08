@@ -18,7 +18,6 @@ module.exports.signup = joi.object({
 			/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,15}$/
 		)
 		.required(),
-	repeatPassword: joi.any().valid(joi.ref("password")).required(),
 });
 
 module.exports.login = joi
