@@ -7,7 +7,7 @@ module.exports.createMessage = async (req, res) => {
 
 	//The auth middleware didn't throw an error, so we don't need to verify if the senderId exists
 	if (!(await UserModel.findById(receiverId)))
-		return res.status(400).send("Utilisateur non trouvé");
+		return res.status(404).send("Utilisateur non trouvé");
 
 	const message = await MessageModel.create({ senderId, receiverId, content });
 
@@ -20,7 +20,7 @@ module.exports.getAllMessages = async (req, res) => {
 
 	//The auth middleware didn't throw an error, so we don't need to verify if the senderId exists
 	if (!(await UserModel.findById(receiverId)))
-		return res.status(400).send("Utilisateur non trouvé");
+		return res.status(404).send("Utilisateur non trouvé");
 
 	const messages = await MessageModel.find({ senderId, receiverId });
 
