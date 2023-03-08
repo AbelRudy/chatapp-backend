@@ -23,11 +23,6 @@ module.exports.signup = async (req, res) => {
 		//error : duplicate email
 		if (Object.keys(error.keyValue)[0].includes("email"))
 			return res.status(409).send("Un compte existe déjà avec cet email.");
-		//error : duplicate phone number
-		if (Object.keys(error.keyValue)[0].includes("phone"))
-			return res
-				.status(409)
-				.send("Un compte existe déjà avec ce numéro de téléphone.");
 
 		return res
 			.status(500)

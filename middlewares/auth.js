@@ -10,7 +10,7 @@ module.exports.verifyToken = async function (req, res, next) {
 	let userId = req.header("x-id");
 
 	if (!accessToken || !refreshToken || !userId) {
-		return res.status(400).send("Données manquantes");
+		return res.status(401).send("Problème d'authentification");
 	}
 
 	try {
@@ -23,7 +23,7 @@ module.exports.verifyToken = async function (req, res, next) {
 		const user = await UserModel.findByIdAndRefreshToken(userId, refreshToken);
 
 		if (!user) {
-			return res.status(404).send("Problème d'authentification");
+			return res.status(401).send("Problème d'authentification");
 		}
 
 		//Check if the refresh token is still valid
