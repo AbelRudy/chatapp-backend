@@ -1,4 +1,3 @@
-const Joi = require("joi");
 const Validators = require("../validators");
 
 module.exports = function (validator) {
